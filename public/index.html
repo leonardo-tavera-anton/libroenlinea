@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editor del Libro</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        /* Estilos básicos para que se vea bien en el celular */
+        body { font-family: sans-serif; margin: 0; padding: 15px; background-color: #f4f4f4; }
+        #editor { 
+            width: 100%; 
+            height: 80vh; /* 80% de la altura de la pantalla */
+            padding: 10px; 
+            box-sizing: border-box; 
+            border: 1px solid #ccc; 
+            font-size: 18px; 
+            resize: none; /* Evita que el usuario cambie el tamaño del área de texto */
+        }
+        #status { margin-top: 10px; font-size: 14px; color: #333; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>✍️ Mi Libro en Línea</h1>
+    <textarea id="editor" placeholder="Empieza a escribir aquí..."></textarea>
+    <div id="status">Cargando...</div>
+
+    <script>
+        const editor = document.getElementById('editor');
+        const statusDiv = document.getElementById('status');
+        let saveTimeout;
+        const SAVE_DELAY = 5000; // 5 segundos
+
+        // 1. Carga el contenido de PostgreSQL al abrir
+        async function loadContent() {
+            try {
+                const response = await fetch('/api/libro');
+                const data = await response.json();
+                editor.value = data.contenido;
+                statusDiv.textContent = 'Libro cargado exitosamente.';
+                statusDiv.className = 'success';
+            } catch (error) {
+                statusDiv.textContent = 'Error al cargar el libro.';
+                statusDiv.className = 'error';
+                console.error('Error cargando:', error);
+            }
+        }
+
+        // 2. Envía el contenido actualizado al servidor (POST)
+        async function saveContent() {
+            statusDiv.textContent = 'Guardando automáticamente...';
+            try {
+                const response = await fetch('/api/libro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contenido: editor.value })
+                });
+
+                if (response.ok) {
+                    statusDiv.textContent = '¡Guardado en la nube! (OK)';
+                    statusDiv.className = 'success';
+                } else {
+                    statusDiv.textContent = 'Error al guardar. Código: ' + response.status;
+                    statusDiv.className = 'error';
+                }
+            } catch (error) {
+                statusDiv.textContent = 'Error de conexión. No se pudo guardar.';
+                statusDiv.className = 'error';
+                console.error('Error guardando:', error);
+            }
+        }
+
+        // 3. Sistema de Guardado Automático al Escribir
+        editor.addEventListener('input', () => {
+            // 1. Limpia el guardado programado anterior
+            clearTimeout(saveTimeout);
+            statusDiv.textContent = 'Escribiendo...';
+            statusDiv.className = '';
+
+            // 2. Programa un nuevo guardado para dentro de 5 segundos
+            saveTimeout = setTimeout(() => {
+                saveContent();
+            }, SAVE_DELAY); 
+        });
+
+        // Inicia el proceso de carga al abrir la página
+        loadContent();
+    </script>
+</body>
+</html>
