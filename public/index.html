@@ -20,7 +20,9 @@
             --error-color: #dc3545;
             --saving-color: #ffc107;
             --icon-color: #666;
-            --status-height: 50px; /* Altura que ocupará la notificación */
+            --header-height: 55px; /* Altura del encabezado */
+            --status-height: 45px; /* Altura que ocupará la notificación */
+            --top-offset: calc(var(--header-height) + var(--status-height)); /* Espacio total reservado */
         }
 
         /* Dark Mode (Activado por la clase 'dark-mode' en <body>) */
@@ -43,19 +45,23 @@
         }
 
         /* ================================== */
-        /* 2. CABECERA Y BOTÓN DE MODO */
+        /* 2. CABECERA Y NOTIFICACIONES FIJAS */
         /* ================================== */
         .header {
-            /* Hacemos el header fijo para que no se mueva al hacer scroll */
-            position: sticky; 
+            /* Hacemos el header FIJO en la parte superior */
+            position: fixed; 
             top: 0;
+            left: 0;
+            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
+            padding: 10px 15px; /* Ajuste de padding para altura de 55px */
             background-color: var(--header-bg);
             border-bottom: 1px solid var(--editor-border);
-            z-index: 100; /* Asegura que esté sobre el editor */
+            z-index: 100;
+            height: var(--header-height); /* Altura explícita */
+            box-sizing: border-box;
         }
         
         h1 {
@@ -72,42 +78,29 @@
             padding: 5px;
             transition: color 0.3s;
         }
-        #mode-toggle:hover {
-            color: var(--text-color);
-        }
-        
-        /* ================================== */
+
         /* 3. NOTIFICACIONES (ÁREA DE ESTADO) */
-        /* ================================== */
-        /* Contenedor que solo ocupa el espacio para empujar el texto */
-        .status-spacer {
-            height: var(--status-height); /* Altura reservada */
-            width: 100%;
-            position: relative;
-        }
-        
         #status {
-            /* Se hace flotante, pero se coloca dentro del espacio reservado */
-            position: absolute; 
-            top: 0;    
+            position: fixed; /* Mantenemos la posición fija */
+            top: var(--header-height); /* ¡Aparece justo debajo del header! */
             left: 50%;
-            transform: translateX(-50%); /* Centra horizontalmente */
-            padding: 12px 25px;
-            border-radius: 8px;
+            transform: translateX(-50%);
+            padding: 8px 20px; /* Ajuste de padding para altura de 45px */
+            border-radius: 0 0 8px 8px; /* Solo esquinas inferiores redondeadas */
             font-weight: bold;
-            font-size: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            opacity: 0; /* Inicialmente invisible */
+            font-size: 14px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 99; /* Debajo del header pero encima del editor */
+            opacity: 0;
             transition: all 0.5s ease;
             pointer-events: none;
             display: flex;
             align-items: center;
-            min-height: 26px; /* Para que el spacer funcione bien */
+            min-height: 25px; 
         }
 
         #status.visible {
-            opacity: 1; /* Mostrar */
+            opacity: 1;
         }
 
         /* Estilos de las notificaciones */
@@ -120,14 +113,18 @@
             font-size: 20px;
         }
 
+
         /* ================================== */
         /* 4. EDITOR DE TEXTO */
         /* ================================== */
         #editor {
             width: 100%;
-            /* El cálculo se ajusta para que el espacio de arriba sea parte del área visible */
-            height: calc(100vh - 100px - var(--status-height)); 
-            padding: 20px;
+            /* El padding superior es CLAVE: Mueve el texto hacia abajo del header y la notificación */
+            padding-top: var(--top-offset); 
+            height: 100vh; /* El alto es 100% de la pantalla para permitir scroll */
+            padding-bottom: 20px; /* Espacio al final */
+            padding-left: 20px;
+            padding-right: 20px;
             box-sizing: border-box;
             border: none;
             font-size: 18px;
@@ -150,9 +147,7 @@
         </button>
     </div>
     
-    <div class="status-spacer">
-        <div id="status"></div>
-    </div>
+    <div id="status"></div>
     
     <textarea id="editor" placeholder="Empieza a escribir aquí..."></textarea>
     
@@ -176,12 +171,10 @@
             statusDiv.innerHTML = `${iconHTML} ${message}`;
             statusDiv.className = type ? type : '';
             
-            // Si hay mensaje, lo hace visible
             if (message) {
                 statusDiv.classList.add('visible');
             }
 
-            // Cancela el temporizador de ocultación anterior
             if (statusTimeout) {
                 clearTimeout(statusTimeout);
             }
@@ -190,7 +183,6 @@
             if (type !== 'saving' && message) {
                 statusTimeout = setTimeout(() => {
                     statusDiv.classList.remove('visible');
-                    // Limpia el contenido después de la transición
                     setTimeout(() => {
                         statusDiv.innerHTML = '';
                         statusDiv.className = '';
@@ -203,10 +195,7 @@
             body.classList.toggle('dark-mode');
             const isDarkMode = body.classList.contains('dark-mode');
             
-            // Actualiza el icono del botón
             modeToggle.querySelector('span').textContent = isDarkMode ? 'light_mode' : 'dark_mode';
-            
-            // Guarda la preferencia en el navegador
             localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
         }
 
@@ -216,13 +205,13 @@
                 body.classList.remove('dark-mode');
                 modeToggle.querySelector('span').textContent = 'dark_mode';
             } else {
-                body.classList.add('dark-mode'); // Por defecto o si es 'dark'
+                body.classList.add('dark-mode'); 
                 modeToggle.querySelector('span').textContent = 'light_mode';
             }
         }
         
         modeToggle.addEventListener('click', toggleTheme);
-        loadTheme(); // Carga el tema al iniciar
+        loadTheme(); 
         
         /* ================================== */
         /* FUNCIONES DE DB (CARGAR/GUARDAR) */
@@ -268,16 +257,13 @@
 
         editor.addEventListener('input', () => {
             clearTimeout(saveTimeout);
-            // Mensaje de 'Escribiendo...' se muestra aquí
             updateStatus('Escribiendo...', 'saving', 'create');
 
-            // Programa un nuevo guardado para después del retardo
             saveTimeout = setTimeout(() => {
                 saveContent();
             }, SAVE_DELAY); 
         });
 
-        // Inicia el proceso de carga al abrir la página
         loadContent();
     </script>
 </body>
