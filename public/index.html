@@ -1,55 +1,240 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Editor del Libro</title>
+    <title>El Libro de Mi Novia</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        /* Estilos básicos para que se vea bien en el celular */
-        body { font-family: sans-serif; margin: 0; padding: 15px; background-color: #f4f4f4; }
-        #editor { 
-            width: 100%; 
-            height: 80vh; /* 80% de la altura de la pantalla */
-            padding: 10px; 
-            box-sizing: border-box; 
-            border: 1px solid #ccc; 
-            font-size: 18px; 
-            resize: none; /* Evita que el usuario cambie el tamaño del área de texto */
+        /* ================================== */
+        /* 1. VARIABLES & ESTILOS BASE (DARK MODE) */
+        /* ================================== */
+        :root {
+            /* Colores Base (Light Mode) */
+            --bg-color: #f4f4f4;
+            --text-color: #333;
+            --editor-bg: #fff;
+            --editor-border: #ccc;
+            --header-bg: #e0e0e0;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --saving-color: #ffc107;
+            --icon-color: #666;
         }
-        #status { margin-top: 10px; font-size: 14px; color: #333; }
-        .success { color: green; }
-        .error { color: red; }
+
+        /* Dark Mode (Activado por la clase 'dark-mode' en <body>) */
+        .dark-mode {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --editor-bg: #2a2a2a;
+            --editor-border: #444;
+            --header-bg: #333;
+            --icon-color: #ccc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.5s, color 0.5s; /* Transición suave del tema */
+        }
+
+        /* ================================== */
+        /* 2. CABECERA Y BOTÓN DE MODO */
+        /* ================================== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--editor-border);
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+
+        #mode-toggle {
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--icon-color);
+            font-size: 24px;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+        #mode-toggle:hover {
+            color: var(--text-color);
+        }
+
+        /* ================================== */
+        /* 3. EDITOR DE TEXTO */
+        /* ================================== */
+        #editor {
+            width: 100%;
+            height: calc(100vh - 100px); /* 100vh menos la altura de la cabecera y el margen */
+            padding: 20px;
+            box-sizing: border-box;
+            border: none;
+            font-size: 18px;
+            resize: none;
+            background-color: var(--editor-bg);
+            color: var(--text-color);
+            transition: background-color 0.5s, color 0.5s;
+        }
+        
+        #editor:focus {
+            outline: none; /* Quitar el borde de enfoque por defecto */
+        }
+
+        /* ================================== */
+        /* 4. NOTIFICACIONES (ÁREA DE ESTADO) */
+        /* ================================== */
+        #status {
+            position: fixed; /* Mantiene la posición fija */
+            bottom: 20px;    /* Aparece en la parte inferior */
+            left: 50%;
+            transform: translateX(-50%); /* Centra horizontalmente */
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0; /* Inicialmente invisible */
+            transition: all 0.5s ease; /* Transición para mostrar/ocultar */
+            pointer-events: none; /* No bloquea clics detrás */
+            display: flex;
+            align-items: center;
+        }
+
+        #status.visible {
+            opacity: 1; /* Mostrar */
+        }
+
+        /* Estilos de las notificaciones */
+        .success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        .error {
+            background-color: var(--error-color);
+            color: white;
+        }
+        .saving {
+            background-color: var(--saving-color);
+            color: var(--text-color);
+        }
+        
+        /* Icono dentro del mensaje de estado */
+        #status .material-icons {
+            margin-right: 8px;
+            font-size: 20px;
+        }
     </style>
 </head>
-<body>
-    <h1>✍️ Mi Libro en Línea</h1>
+<body class="dark-mode"> <div class="header">
+        <h1>✍️ El Libro de Mi Novia</h1>
+        <button id="mode-toggle" title="Cambiar Tema" aria-label="Cambiar Tema">
+            <span class="material-icons">light_mode</span>
+        </button>
+    </div>
+    
     <textarea id="editor" placeholder="Empieza a escribir aquí..."></textarea>
-    <div id="status">Cargando...</div>
+    
+    <div id="status"></div>
 
     <script>
         const editor = document.getElementById('editor');
         const statusDiv = document.getElementById('status');
+        const modeToggle = document.getElementById('mode-toggle');
+        const body = document.body;
+        
         let saveTimeout;
-        const SAVE_DELAY = 5000; // 5 segundos
+        let statusTimeout;
+        const SAVE_DELAY = 3000; // 3 segundos para guardar
 
-        // 1. Carga el contenido de PostgreSQL al abrir
+        /* ================================== */
+        /* FUNCIONES DE ESTADO Y TEMA */
+        /* ================================== */
+
+        function updateStatus(message, type, icon = '') {
+            const iconHTML = icon ? `<span class="material-icons">${icon}</span>` : '';
+            statusDiv.innerHTML = `${iconHTML} ${message}`;
+            statusDiv.className = type ? type : '';
+            
+            // Si hay mensaje, lo hace visible
+            if (message) {
+                statusDiv.classList.add('visible');
+            }
+
+            // Cancela el temporizador de ocultación anterior
+            if (statusTimeout) {
+                clearTimeout(statusTimeout);
+            }
+
+            // Oculta el mensaje después de 3 segundos
+            if (type !== 'saving' && message) {
+                statusTimeout = setTimeout(() => {
+                    statusDiv.classList.remove('visible');
+                    // Limpia el contenido después de la transición
+                    setTimeout(() => {
+                        statusDiv.innerHTML = '';
+                        statusDiv.className = '';
+                    }, 500); 
+                }, 3000); 
+            }
+        }
+
+        function toggleTheme() {
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            
+            // Actualiza el icono del botón
+            modeToggle.querySelector('span').textContent = isDarkMode ? 'light_mode' : 'dark_mode';
+            
+            // Guarda la preferencia en el navegador
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                body.classList.remove('dark-mode');
+                modeToggle.querySelector('span').textContent = 'dark_mode';
+            } else {
+                body.classList.add('dark-mode'); // Por defecto o si es 'dark'
+                modeToggle.querySelector('span').textContent = 'light_mode';
+            }
+        }
+        
+        modeToggle.addEventListener('click', toggleTheme);
+        loadTheme(); // Carga el tema al iniciar
+        
+        /* ================================== */
+        /* FUNCIONES DE DB (CARGAR/GUARDAR) */
+        /* ================================== */
+
         async function loadContent() {
+            updateStatus('Conectando con la nube...', 'saving', 'cloud_queue');
             try {
                 const response = await fetch('/api/libro');
                 const data = await response.json();
                 editor.value = data.contenido;
-                statusDiv.textContent = 'Libro cargado exitosamente.';
-                statusDiv.className = 'success';
+                updateStatus('¡Libro cargado exitosamente!', 'success', 'check_circle');
             } catch (error) {
-                statusDiv.textContent = 'Error al cargar el libro.';
-                statusDiv.className = 'error';
+                updateStatus('Error al cargar el libro. Inténtalo de nuevo.', 'error', 'error_outline');
                 console.error('Error cargando:', error);
             }
         }
 
-        // 2. Envía el contenido actualizado al servidor (POST)
         async function saveContent() {
-            statusDiv.textContent = 'Guardando automáticamente...';
+            updateStatus('Guardando automáticamente...', 'saving', 'save');
+            
             try {
                 const response = await fetch('/api/libro', {
                     method: 'POST',
@@ -58,27 +243,25 @@
                 });
 
                 if (response.ok) {
-                    statusDiv.textContent = '¡Guardado en la nube! (OK)';
-                    statusDiv.className = 'success';
+                    updateStatus('¡Guardado en la nube! (OK)', 'success', 'cloud_done');
                 } else {
-                    statusDiv.textContent = 'Error al guardar. Código: ' + response.status;
-                    statusDiv.className = 'error';
+                    updateStatus(`Error al guardar. Código: ${response.status}`, 'error', 'warning');
                 }
             } catch (error) {
-                statusDiv.textContent = 'Error de conexión. No se pudo guardar.';
-                statusDiv.className = 'error';
+                updateStatus('Error de conexión. No se pudo guardar.', 'error', 'portable_wifi_off');
                 console.error('Error guardando:', error);
             }
         }
 
-        // 3. Sistema de Guardado Automático al Escribir
-        editor.addEventListener('input', () => {
-            // 1. Limpia el guardado programado anterior
-            clearTimeout(saveTimeout);
-            statusDiv.textContent = 'Escribiendo...';
-            statusDiv.className = '';
+        /* ================================== */
+        /* EVENTOS */
+        /* ================================== */
 
-            // 2. Programa un nuevo guardado para dentro de 5 segundos
+        editor.addEventListener('input', () => {
+            clearTimeout(saveTimeout);
+            updateStatus('Escribiendo...', 'saving', 'create');
+
+            // Programa un nuevo guardado para después del retardo
             saveTimeout = setTimeout(() => {
                 saveContent();
             }, SAVE_DELAY); 
