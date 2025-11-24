@@ -193,7 +193,6 @@
                 clearTimeout(statusTimeout);
             }
 
-            // Oculta el mensaje después de 3 segundos, excepto si está en modo 'saving'
             if (type !== 'saving' && message) {
                 statusTimeout = setTimeout(() => {
                     statusDiv.classList.remove('visible');
@@ -255,7 +254,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         contenido: editor.value,
-                        userId: CURRENT_USER_ID // <--- ENVIAMOS EL ID AL SERVIDOR
+                        userId: CURRENT_USER_ID // ENVIAMOS EL ID AL SERVIDOR
                     })
                 });
 
