@@ -93,13 +93,31 @@
         }
         #editor-wrapper { display: none; height: 100vh; }
         
-        /* ESTILOS DE MOSTRAR CONTRASEÑA */
-        .password-container { position: relative; }
-        .password-container input { padding-right: 40px; }
+        /* ESTILOS DE MOSTRAR CONTRASEÑA (CORREGIDOS) */
+        .password-container { 
+            position: relative; 
+            margin-bottom: 10px; /* Asegura espacio debajo del campo de password */
+        }
+        .password-container input { 
+            padding-right: 40px; 
+            margin: 0; /* Ajusta el margen si el contenedor ya tiene */
+        }
         .toggle-password {
-            position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
-            cursor: pointer; color: var(--icon-color); border: none; background: none;
-            padding: 0; font-size: 20px; opacity: 0.7;
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--icon-color);
+            /* --- CORRECCIÓN PARA EL TAMAÑO --- */
+            border: none;
+            background: none;
+            padding: 5px; /* Hace el área clickeable más pequeña */
+            font-size: 18px; /* Tamaño del icono */
+            line-height: 1; 
+            z-index: 5; 
+            /* ---------------------------------- */
+            opacity: 0.7;
         }
         
         /* 5. EDITOR DE TEXTO */
@@ -134,7 +152,7 @@
             
             <form id="register-form" style="display: none;">
                 <h2>📝 Registrar Cuenta</h2>
-                Crea una nueva cuenta para guardar tu libro en la nube.
+                <p style="font-size: 14px; color: var(--text-color); opacity: 0.8; margin-top: -10px; margin-bottom: 10px;">Crea una nueva cuenta para guardar tu libro en la nube.</p>
                 <input type="text" id="register-username" placeholder="Usuario" required>
                 
                 <div class="password-container">
