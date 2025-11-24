@@ -96,12 +96,18 @@
         /* ESTILOS DE MOSTRAR CONTRASEÑA (CORREGIDOS Y ESPECÍFICOS) */
         .password-container { 
             position: relative; 
-            margin-bottom: 10px; 
+            margin-bottom: 10px; /* Mantenemos este margen para el espaciado entre campos */
+            /* Se eliminan las reglas de ancho y padding-right de aquí */
         }
+        
         .password-container input { 
-            width: 100%; /* Asegura que la entrada use todo el ancho disponible */
+            /* La clave es anular los márgenes y usar padding vertical coherente */
+            margin: 0 !important; /* <--- IMPORTANTE: Anula el margin general de .auth-box input */
+            padding-top: 12px;
+            padding-bottom: 12px; 
             padding-right: 40px; /* Deja espacio para el botón */
-            margin: 0; /* Anula margen que puede afectar la alineación */
+            width: 100%;
+            box-sizing: border-box;
         }
         
         /* USAMOS UN SELECTOR MÁS FUERTE PARA ANULAR CONFLICTOS GENERALES DE BOTONES */
@@ -109,31 +115,37 @@
             position: absolute;
             top: 50%;
             right: 10px;
-            font-size: 18px;
-            line-height: 1;
-            display: block;
             transform: translateY(-50%);
             cursor: pointer;
             color: var(--icon-color);
             
-            /* --- REGLAS CLAVE PARA FORZAR EL TAMAÑO PEQUEÑO Y ANULAR ESTILOS GENERALES --- */
+            /* --- REGLAS CLAVE PARA FORZAR TAMAÑO Y ANULAR ESTILOS GENERALES --- */
             width: auto !important; /* Fuerza a que no tome el 100% del ancho */
             height: auto; 
             padding: 5px; 
-            font-size: 18px; 
             background: none; 
             border: none;
-            /* ----------------------------------------------------------------------------- */
+            /* ----------------------------------------------------------------- */
 
             line-height: 1; 
             z-index: 5; 
             opacity: 0.7;
         }
         
+        /* Corrección para centrar el ícono dentro del botón */
+        .toggle-password .material-icons {
+            line-height: 1; /* CLAVE para el centrado vertical */
+            font-size: 18px; 
+            display: block; 
+        }
+        
+        /* ================================== */
         /* 5. EDITOR DE TEXTO */
+        /* ================================== */
         #editor {
             width: 100%; padding-top: var(--top-offset); height: 100vh;
-            padding-bottom: 20px; padding-left: 20px; padding-right: 20px;
+            padding-bottom: 100px; /* <--- CORRECCIÓN DE ESPACIO INFERIOR */
+            padding-left: 20px; padding-right: 20px;
             box-sizing: border-box; border: none; font-size: 18px; resize: none;
             background-color: var(--editor-bg); color: var(--text-color);
             transition: background-color 0.5s, color 0.5s;
