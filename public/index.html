@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mi libro en linea</title>
+    <title>Mi libro en linea - Login</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         /* ================================== */
-        /* 1. VARIABLES & ESTILOS BASE (DARK MODE) */
+        /* 1. VARIABLES & ESTILOS BASE */
         /* ================================== */
         :root {
-            /* Colores Base (Light Mode) */
             --bg-color: #f4f4f4;
             --text-color: #333;
             --editor-bg: #fff;
@@ -19,12 +18,11 @@
             --error-color: #dc3545;
             --saving-color: #ffc107;
             --icon-color: #666;
-            --header-height: 55px; /* Altura del encabezado */
-            --status-height: 55px; /* Altura que ocupará la notificación + espacio */
-            --top-offset: calc(var(--header-height) + var(--status-height)); /* Espacio total reservado */
+            --header-height: 55px; 
+            --status-height: 55px; 
+            --top-offset: calc(var(--header-height) + var(--status-height)); 
         }
 
-        /* Dark Mode (Activado por la clase 'dark-mode' en <body>) */
         .dark-mode {
             --bg-color: #1a1a1a;
             --text-color: #e0e0e0;
@@ -46,7 +44,6 @@
         /* 2. CABECERA Y NOTIFICACIONES FIJAS */
         /* ================================== */
         .header {
-            /* Hacemos el header FIJO en la parte superior */
             position: fixed; 
             top: 0;
             left: 0;
@@ -62,12 +59,9 @@
             box-sizing: border-box;
         }
         
-        h1 {
-            font-size: 24px;
-            margin: 0;
-        }
+        h1 { font-size: 24px; margin: 0; }
 
-        #mode-toggle {
+        #mode-toggle, #logout-button {
             cursor: pointer;
             border: none;
             background: none;
@@ -80,7 +74,7 @@
         /* 3. NOTIFICACIONES (ÁREA DE ESTADO) */
         #status {
             position: fixed; 
-            top: var(--header-height); /* Aparece justo debajo del header */
+            top: var(--header-height); 
             left: 50%;
             transform: translateX(-50%);
             padding: 8px 20px; 
@@ -95,29 +89,74 @@
             display: flex;
             align-items: center;
             min-height: 25px; 
-            margin-top: 5px; /* Separación visual entre header y noti */
+            margin-top: 5px; 
         }
 
-        #status.visible {
-            opacity: 1;
-        }
-
-        /* Estilos de las notificaciones */
+        #status.visible { opacity: 1; }
         .success { background-color: var(--success-color); color: white; }
         .error { background-color: var(--error-color); color: white; }
         .saving { background-color: var(--saving-color); color: var(--text-color); }
-        
-        #status .material-icons {
-            margin-right: 8px;
-            font-size: 20px;
-        }
+        #status .material-icons { margin-right: 8px; font-size: 20px; }
 
         /* ================================== */
-        /* 4. EDITOR DE TEXTO */
+        /* 4. ESTILOS DE AUTENTICACIÓN */
         /* ================================== */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .auth-box {
+            background-color: var(--editor-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
+        }
+
+        .auth-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid var(--icon-color);
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .auth-box button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff; 
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .toggle-link {
+            display: block;
+            margin-top: 15px;
+            color: #007bff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        #editor-wrapper {
+            display: none;
+            height: 100vh;
+        }
+
+        /* 5. EDITOR DE TEXTO */
         #editor {
             width: 100%;
-            /* Empuja el texto hacia abajo del header y la notificación */
             padding-top: var(--top-offset); 
             height: 100vh;
             padding-bottom: 20px; 
@@ -132,22 +171,50 @@
             transition: background-color 0.5s, color 0.5s;
         }
         
-        #editor:focus {
-            outline: none;
-        }
+        #editor:focus { outline: none; }
     </style>
 </head>
 <body class="dark-mode"> 
-    <div class="header">
-        <h1>✍️ Mi libro en linea</h1>
-        <button id="mode-toggle" title="Cambiar Tema" aria-label="Cambiar Tema">
-            <span class="material-icons">light_mode</span>
-        </button>
+
+    <div id="auth-view" class="auth-container">
+        <div class="auth-box">
+            
+            <form id="login-form">
+                <h2>✍️ Iniciar Sesión</h2>
+                <input type="text" id="login-username" placeholder="Usuario" required>
+                <input type="password" id="login-password" placeholder="Contraseña" required>
+                <button type="submit">Entrar</button>
+            </form>
+            
+            <form id="register-form" style="display: none;">
+                <h2>✍️ Registrar Cuenta</h2>
+                <input type="text" id="register-username" placeholder="Usuario" required>
+                <input type="password" id="register-password" placeholder="Contraseña" required>
+                <button type="submit">Registrar</button>
+            </form>
+            
+            <span id="auth-error" style="color: var(--error-color); display: block; margin-top: 10px;"></span>
+            <a href="#" class="toggle-link" id="toggle-auth">¿No tienes cuenta? Regístrate aquí</a>
+        </div>
     </div>
-    
-    <div id="status"></div>
-    
-    <textarea id="editor" placeholder="Empieza a escribir aquí..."></textarea>
+
+
+    <div id="editor-wrapper">
+        <div class="header">
+            <h1>✍️ Mi libro en linea</h1>
+            <div>
+                <button id="logout-button" title="Cerrar Sesión" style="margin-right: 10px;">
+                    <span class="material-icons">logout</span>
+                </button>
+                <button id="mode-toggle" title="Cambiar Tema" aria-label="Cambiar Tema">
+                    <span class="material-icons">light_mode</span>
+                </button>
+            </div>
+        </div>
+        
+        <div id="status"></div>
+        <textarea id="editor" placeholder="Empieza a escribir aquí..."></textarea>
+    </div>
     
     <script>
         const editor = document.getElementById('editor');
@@ -155,51 +222,33 @@
         const modeToggle = document.getElementById('mode-toggle');
         const body = document.body;
         
+        const authView = document.getElementById('auth-view');
+        const editorWrapper = document.getElementById('editor-wrapper');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const toggleAuth = document.getElementById('toggle-auth');
+        const authError = document.getElementById('auth-error');
+        const logoutButton = document.getElementById('logout-button');
+        
         let saveTimeout;
         let statusTimeout;
-        const SAVE_DELAY = 3000; // 3 segundos para guardar
+        const SAVE_DELAY = 3000;
 
-        // ===============================================
-        // LÓGICA DE PRIVACIDAD: GENERAR Y USAR USER ID
-        // ===============================================
-        function getOrCreateUserId() {
-            let userId = localStorage.getItem('user_id');
-            if (!userId) {
-                // Genera un ID único basado en la fecha y un número aleatorio
-                userId = 'user_' + Date.now() + Math.floor(Math.random() * 99999);
-                localStorage.setItem('user_id', userId);
-            }
-            // Retorna el ID como string (ej: "user_1700...")
-            return userId; 
-        }
-
-        const CURRENT_USER_ID = getOrCreateUserId();
-        // Fin de la lógica de privacidad
-        
-        /* ================================== */
-        /* FUNCIONES DE ESTADO Y TEMA */
-        /* ================================== */
-
+        // ==================================
+        // FUNCIONES DE ESTADO Y TEMA
+        // ==================================
         function updateStatus(message, type, icon = '') {
             const iconHTML = icon ? `<span class="material-icons">${icon}</span>` : '';
             statusDiv.innerHTML = `${iconHTML} ${message}`;
             statusDiv.className = type ? type : '';
             
-            if (message) {
-                statusDiv.classList.add('visible');
-            }
-
-            if (statusTimeout) {
-                clearTimeout(statusTimeout);
-            }
+            if (message) { statusDiv.classList.add('visible'); }
+            if (statusTimeout) { clearTimeout(statusTimeout); }
 
             if (type !== 'saving' && message) {
                 statusTimeout = setTimeout(() => {
                     statusDiv.classList.remove('visible');
-                    setTimeout(() => {
-                        statusDiv.innerHTML = '';
-                        statusDiv.className = '';
-                    }, 500); 
+                    setTimeout(() => { statusDiv.innerHTML = ''; statusDiv.className = ''; }, 500); 
                 }, 3000); 
             }
         }
@@ -207,7 +256,6 @@
         function toggleTheme() {
             body.classList.toggle('dark-mode');
             const isDarkMode = body.classList.contains('dark-mode');
-            
             modeToggle.querySelector('span').textContent = isDarkMode ? 'light_mode' : 'dark_mode';
             localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
         }
@@ -225,22 +273,107 @@
         
         modeToggle.addEventListener('click', toggleTheme);
         loadTheme(); 
-        
-        /* ================================== */
-        /* FUNCIONES DE DB (CARGAR/GUARDAR) */
-        /* ================================== */
 
+        // ==================================
+        // VISTAS DE AUTENTICACIÓN
+        // ==================================
+
+        function showError(message) {
+            authError.textContent = message;
+            authError.style.display = 'block';
+        }
+
+        function hideAuth() {
+            authView.style.display = 'none';
+            editorWrapper.style.display = 'block';
+        }
+
+        function showAuth() {
+            authView.style.display = 'flex';
+            editorWrapper.style.display = 'none';
+            editor.value = ''; // Limpia el editor al salir
+        }
+
+        // ==================================
+        // LÓGICA DE AUTH
+        // ==================================
+
+        async function authenticate(endpoint, username, password) {
+            authError.textContent = '';
+            updateStatus('Conectando...', 'saving', 'compare_arrows');
+            
+            const response = await fetch(`/api/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            updateStatus('', 'saving', ''); // Limpia el estado de guardado
+            const data = await response.json();
+            
+            if (response.ok) {
+                hideAuth();
+                updateStatus('¡Bienvenido!', 'success', 'waving_hand');
+                loadContent(); // Carga el libro del usuario logueado
+            } else {
+                showError(data.error || 'Ocurrió un error de conexión o credenciales.');
+                updateStatus('Fallo de autenticación', 'error', 'lock');
+            }
+        }
+        
+        // ==================================
+        // EVENTOS DE AUTH
+        // ==================================
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            authenticate('login', username, password);
+        });
+
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            authenticate('register', username, password);
+        });
+
+        toggleAuth.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Cambia entre la vista de Login y Registro
+            if (loginForm.style.display !== 'none') {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                toggleAuth.textContent = '¿Ya tienes cuenta? Inicia sesión aquí';
+            } else {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                toggleAuth.textContent = '¿No tienes cuenta? Regístrate aquí';
+            }
+            authError.textContent = '';
+        });
+        
+        logoutButton.addEventListener('click', async () => {
+             await fetch('/api/logout', { method: 'POST' });
+             showAuth(); // Muestra la vista de login
+             updateStatus('Sesión cerrada', 'success', 'exit_to_app');
+             // Si el localStorage tiene info del tema, se mantiene. No recarga toda la página.
+        });
+
+        // ==================================
+        // FUNCIONES DE DB (SEGURAS POR SESIÓN)
+        // ==================================
+        
         async function loadContent() {
-            updateStatus('Conectando con la nube...', 'saving', 'cloud_queue');
+            updateStatus('Cargando libro...', 'saving', 'cloud_queue');
             try {
-                // Enviamos el UserID como parámetro de consulta
-                const response = await fetch(`/api/libro?userId=${CURRENT_USER_ID}`);
+                // Ya no enviamos ID, el servidor lo toma de la sesión
+                const response = await fetch('/api/libro');
                 const data = await response.json();
                 editor.value = data.contenido;
                 updateStatus('¡Libro cargado exitosamente!', 'success', 'check_circle');
             } catch (error) {
-                updateStatus('Error al cargar el libro. Inténtalo de nuevo.', 'error', 'error_outline');
-                console.error('Error cargando:', error);
+                 updateStatus('Error al cargar.', 'error', 'error_outline');
             }
         }
 
@@ -248,14 +381,11 @@
             updateStatus('Guardando automáticamente...', 'saving', 'save');
             
             try {
-                // Enviamos el UserID en el cuerpo de la petición (POST)
+                // Ya no enviamos ID, el servidor lo toma de la sesión
                 const response = await fetch('/api/libro', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        contenido: editor.value,
-                        userId: CURRENT_USER_ID // ENVIAMOS EL ID AL SERVIDOR
-                    })
+                    body: JSON.stringify({ contenido: editor.value })
                 });
 
                 if (response.ok) {
@@ -265,13 +395,23 @@
                 }
             } catch (error) {
                 updateStatus('Error de conexión. No se pudo guardar.', 'error', 'portable_wifi_off');
-                console.error('Error guardando:', error);
             }
         }
 
-        /* ================================== */
-        /* EVENTOS */
-        /* ================================== */
+        // ==================================
+        // INICIO Y EVENTOS
+        // ==================================
+        async function checkSession() {
+            const response = await fetch('/api/check-session');
+            const data = await response.json();
+
+            if (data.loggedIn) {
+                hideAuth();
+                loadContent();
+            } else {
+                showAuth();
+            }
+        }
 
         editor.addEventListener('input', () => {
             clearTimeout(saveTimeout);
@@ -282,7 +422,8 @@
             }, SAVE_DELAY); 
         });
 
-        loadContent();
+        // Inicia el proceso
+        checkSession();
     </script>
 </body>
 </html>
