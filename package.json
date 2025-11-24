@@ -4,7 +4,7 @@
   "description": "Editor sencillo para escribir un libro.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "chmod +x node_modules/.bin/prisma && node server.js"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",
