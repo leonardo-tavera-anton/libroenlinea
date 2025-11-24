@@ -93,30 +93,37 @@
         }
         #editor-wrapper { display: none; height: 100vh; }
         
-        /* ESTILOS DE MOSTRAR CONTRASEÑA (CORREGIDOS) */
+        /* ESTILOS DE MOSTRAR CONTRASEÑA (CORREGIDOS Y ESPECÍFICOS) */
         .password-container { 
             position: relative; 
             margin-bottom: 10px; 
         }
         .password-container input { 
-            padding-right: 40px; 
-            margin: 0; 
+            width: 100%; /* Asegura que la entrada use todo el ancho disponible */
+            padding-right: 40px; /* Deja espacio para el botón */
+            margin: 0; /* Anula margen que puede afectar la alineación */
         }
-        .toggle-password {
+        
+        /* USAMOS UN SELECTOR MÁS FUERTE PARA ANULAR CONFLICTOS GENERALES DE BOTONES */
+        .password-container .toggle-password {
             position: absolute;
             top: 50%;
             right: 10px;
             transform: translateY(-50%);
             cursor: pointer;
             color: var(--icon-color);
-            /* --- CORRECCIÓN PARA EL TAMAÑO --- */
-            border: none;
-            background: none;
+            
+            /* --- REGLAS CLAVE PARA FORZAR EL TAMAÑO PEQUEÑO Y ANULAR ESTILOS GENERALES --- */
+            width: auto !important; /* Fuerza a que no tome el 100% del ancho */
+            height: auto; 
             padding: 5px; 
             font-size: 18px; 
+            background: none; 
+            border: none;
+            /* ----------------------------------------------------------------------------- */
+
             line-height: 1; 
             z-index: 5; 
-            /* ---------------------------------- */
             opacity: 0.7;
         }
         
