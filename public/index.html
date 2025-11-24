@@ -78,11 +78,20 @@
             background-color: var(--editor-bg); padding: 30px; border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); width: 350px; text-align: center;
         }
+        
+        /* [A] ESTILO GENERAL DE INPUTS (Hemos quitado el margen vertical) */
         .auth-box input {
-            width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--icon-color);
-            border-radius: 5px; box-sizing: border-box; background-color: var(--bg-color);
+            width: 100%; 
+            padding: 12px; 
+            margin: 0; /* CLAVE: Quitamos el margen vertical del input para que el 50% sea exacto */
+            border: 1px solid var(--icon-color);
+            border-radius: 5px; 
+            box-sizing: border-box; 
+            background-color: var(--bg-color);
             color: var(--text-color);
+            line-height: 1.5; /* CLAVE: Fuerza una altura de línea consistente para el centrado del texto */
         }
+        
         .auth-box button {
             width: 100%; padding: 12px; margin-top: 15px; border: none; border-radius: 5px;
             background-color: #007bff; color: white; font-weight: bold; cursor: pointer;
@@ -93,18 +102,17 @@
         }
         #editor-wrapper { display: none; height: 100vh; }
         
-        /* ESTILOS DE MOSTRAR CONTRASEÑA (CORREGIDOS Y ESPECÍFICOS) */
+        /* [B] ESTILOS DE MOSTRAR CONTRASEÑA (CORREGIDOS Y ESPECÍFICOS) */
         .password-container { 
             position: relative; 
-            margin-bottom: 10px; 
+            margin-top: 10px;    /* REINTRODUCIMOS el margen que quitamos del input */
+            margin-bottom: 20px; /* Separación un poco más grande entre password y botón Entrar */
         }
         
         .password-container input { 
-            /* Mantenemos el padding-right para hacer espacio */
-            padding-right: 40px; 
-            width: 100%;
-            box-sizing: border-box;
-            /* DEJAMOS QUE EL INPUT GENERAL CONTROLE EL MARGEN Y EL PADDING SUPERIOR/INFERIOR (10px margin, 12px padding) */
+            /* Esto sobreescribe la regla general de input solo para el padding-right, si es necesario */
+            padding-right: 40px; /* Deja espacio para el botón */
+            /* El resto hereda el margin: 0; de .auth-box input */
         }
         
         /* BOTÓN DE VISIBILIDAD DE CONTRASEÑA */
@@ -112,13 +120,13 @@
             position: absolute;
             top: 50%;
             right: 10px;
-            transform: translateY(-50%);
+            transform: translateY(-50%); /* CLAVE: Centrado absoluto vertical */
             cursor: pointer;
             color: var(--icon-color);
             
             width: auto !important;
             height: auto; 
-            padding: 5px; /* Espacio de clic para el botón */
+            padding: 5px; 
             background: none; 
             border: none;
             z-index: 5; 
@@ -127,9 +135,9 @@
         
         /* Regla CLAVE: Centrado interno del ícono */
         .toggle-password .material-icons {
-            line-height: 1; /* Esto elimina el espacio vertical sobrante del ícono de la fuente */
+            line-height: 1; /* CLAVE: Elimina el espacio vertical sobrante de la fuente */
             font-size: 18px; 
-            display: block; /* Ayuda a que line-height: 1 funcione correctamente */
+            display: block; 
         }
         
         /* ================================== */
