@@ -1,25 +1,47 @@
-// prisma/schema.prisma (MODIFICADO)
+// prisma/schema.prisma
 
-// ... (datasource y generator se mantienen)
+// ===============================================
+// 1. CONFIGURACIÓN DE CONEXIÓN
+// ===============================================
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") 
+}
+
+// ===============================================
+// 2. CONFIGURACIÓN DEL CLIENTE
+// ===============================================
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ===============================================
+// 3. MODELO DE DATOS
+// ===============================================
 
 model Usuario {
   id        Int      @id @default(autoincrement())
   username  String   @unique // El nombre de usuario debe ser único
-  password  String   // Aquí se guardará la contraseña encriptada
+  password  String   // Aquí se guardará la contraseña encriptada (hashed)
   
   // Relacionamos el usuario con su libro (Relación 1 a 1)
+  // El ? indica que un usuario puede existir sin tener un libro aún.
   libro     Libro?
 }
 
 model Libro {
-  // Ya no usamos el BigInt, sino la clave del usuario
-  id          Int      @id @default(autoincrement()) 
+  // AJUSTE CRÍTICO: 
+  // La clave primaria (id) es ahora la clave foránea (usuarioId).
+  // Esto asegura que haya EXACTAMENTE 1 libro por usuario.
+  
+  // 1. La clave foránea que apunta al usuario
+  usuarioId   Int      @unique @id // <-- CLAVE: Es ID y ÚNICA (1 libro por usuario)
+  
+  // 2. Definición de la relación
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id]) 
+  
   titulo      String   @default("Mi Libro Personal")
   contenido   String   @default("")
-  
-  // Clave foránea para la relación 1 a 1 con Usuario
-  usuarioId   Int      @unique
-  usuario     Usuario  @relation(fields: [usuarioId], references: [id]) 
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
