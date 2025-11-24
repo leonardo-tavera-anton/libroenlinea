@@ -96,21 +96,18 @@
         /* ESTILOS DE MOSTRAR CONTRASEÑA (CORREGIDOS Y ESPECÍFICOS) */
         .password-container { 
             position: relative; 
-            margin-bottom: 10px; /* Mantenemos este margen para el espaciado entre campos */
-            /* Se eliminan las reglas de ancho y padding-right de aquí */
+            margin-bottom: 10px; 
         }
         
         .password-container input { 
-            /* La clave es anular los márgenes y usar padding vertical coherente */
-            margin: 0 !important; /* <--- IMPORTANTE: Anula el margin general de .auth-box input */
-            padding-top: 12px;
-            padding-bottom: 12px; 
-            padding-right: 40px; /* Deja espacio para el botón */
+            /* Mantenemos el padding-right para hacer espacio */
+            padding-right: 40px; 
             width: 100%;
             box-sizing: border-box;
+            /* DEJAMOS QUE EL INPUT GENERAL CONTROLE EL MARGEN Y EL PADDING SUPERIOR/INFERIOR (10px margin, 12px padding) */
         }
         
-        /* USAMOS UN SELECTOR MÁS FUERTE PARA ANULAR CONFLICTOS GENERALES DE BOTONES */
+        /* BOTÓN DE VISIBILIDAD DE CONTRASEÑA */
         .password-container .toggle-password {
             position: absolute;
             top: 50%;
@@ -119,24 +116,20 @@
             cursor: pointer;
             color: var(--icon-color);
             
-            /* --- REGLAS CLAVE PARA FORZAR TAMAÑO Y ANULAR ESTILOS GENERALES --- */
-            width: auto !important; /* Fuerza a que no tome el 100% del ancho */
+            width: auto !important;
             height: auto; 
-            padding: 5px; 
+            padding: 5px; /* Espacio de clic para el botón */
             background: none; 
             border: none;
-            /* ----------------------------------------------------------------- */
-
-            line-height: 1; 
             z-index: 5; 
             opacity: 0.7;
         }
         
-        /* Corrección para centrar el ícono dentro del botón */
+        /* Regla CLAVE: Centrado interno del ícono */
         .toggle-password .material-icons {
-            line-height: 1; /* CLAVE para el centrado vertical */
+            line-height: 1; /* Esto elimina el espacio vertical sobrante del ícono de la fuente */
             font-size: 18px; 
-            display: block; 
+            display: block; /* Ayuda a que line-height: 1 funcione correctamente */
         }
         
         /* ================================== */
@@ -144,7 +137,7 @@
         /* ================================== */
         #editor {
             width: 100%; padding-top: var(--top-offset); height: 100vh;
-            padding-bottom: 100px; /* <--- CORRECCIÓN DE ESPACIO INFERIOR */
+            padding-bottom: 100px; /* Corrección de espacio inferior */
             padding-left: 20px; padding-right: 20px;
             box-sizing: border-box; border: none; font-size: 18px; resize: none;
             background-color: var(--editor-bg); color: var(--text-color);
