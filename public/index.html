@@ -14,14 +14,13 @@
             --bg-color: #f4f4f4;
             --text-color: #333;
             --editor-bg: #fff;
-            --editor-border: #ccc;
             --header-bg: #e0e0e0;
             --success-color: #28a745;
             --error-color: #dc3545;
             --saving-color: #ffc107;
             --icon-color: #666;
             --header-height: 55px; /* Altura del encabezado */
-            --status-height: 55px; /* Altura que ocupará la notificación */
+            --status-height: 55px; /* Altura que ocupará la notificación + espacio */
             --top-offset: calc(var(--header-height) + var(--status-height)); /* Espacio total reservado */
         }
 
@@ -30,7 +29,6 @@
             --bg-color: #1a1a1a;
             --text-color: #e0e0e0;
             --editor-bg: #2a2a2a;
-            --editor-border: #444;
             --header-bg: #333;
             --icon-color: #ccc;
         }
@@ -56,11 +54,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px; /* Ajuste de padding para altura de 55px */
+            padding: 10px 15px;
             background-color: var(--header-bg);
             border-bottom: 1px solid var(--editor-border);
             z-index: 100;
-            height: var(--header-height); /* Altura explícita */
+            height: var(--header-height); 
             box-sizing: border-box;
         }
         
@@ -81,22 +79,23 @@
 
         /* 3. NOTIFICACIONES (ÁREA DE ESTADO) */
         #status {
-            position: fixed; /* Mantenemos la posición fija */
-            top: var(--header-height); /* ¡Aparece justo debajo del header! */
+            position: fixed; 
+            top: var(--header-height); /* Aparece justo debajo del header */
             left: 50%;
             transform: translateX(-50%);
-            padding: 8px 20px; /* Ajuste de padding para altura de 45px */
-            border-radius: 0 0 8px 8px; /* Solo esquinas inferiores redondeadas */
+            padding: 8px 20px; 
+            border-radius: 0 0 8px 8px; 
             font-weight: bold;
             font-size: 14px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 99; /* Debajo del header pero encima del editor */
+            z-index: 99; 
             opacity: 0;
             transition: all 0.5s ease;
             pointer-events: none;
             display: flex;
             align-items: center;
             min-height: 25px; 
+            margin-top: 5px; /* Separación visual entre header y noti */
         }
 
         #status.visible {
@@ -113,16 +112,15 @@
             font-size: 20px;
         }
 
-
         /* ================================== */
         /* 4. EDITOR DE TEXTO */
         /* ================================== */
         #editor {
             width: 100%;
-            /* El padding superior es CLAVE: Mueve el texto hacia abajo del header y la notificación */
+            /* Empuja el texto hacia abajo del header y la notificación */
             padding-top: var(--top-offset); 
-            height: 100vh; /* El alto es 100% de la pantalla para permitir scroll */
-            padding-bottom: 20px; /* Espacio al final */
+            height: 100vh;
+            padding-bottom: 20px; 
             padding-left: 20px;
             padding-right: 20px;
             box-sizing: border-box;
@@ -151,7 +149,6 @@
     
     <textarea id="editor" placeholder="Empieza a escribir aquí..."></textarea>
     
-
     <script>
         const editor = document.getElementById('editor');
         const statusDiv = document.getElementById('status');
@@ -162,6 +159,23 @@
         let statusTimeout;
         const SAVE_DELAY = 3000; // 3 segundos para guardar
 
+        // ===============================================
+        // LÓGICA DE PRIVACIDAD: GENERAR Y USAR USER ID
+        // ===============================================
+        function getOrCreateUserId() {
+            let userId = localStorage.getItem('user_id');
+            if (!userId) {
+                // Genera un ID único basado en la fecha y un número aleatorio
+                userId = 'user_' + Date.now() + Math.floor(Math.random() * 99999);
+                localStorage.setItem('user_id', userId);
+            }
+            // Retorna el ID como string (ej: "user_1700...")
+            return userId; 
+        }
+
+        const CURRENT_USER_ID = getOrCreateUserId();
+        // Fin de la lógica de privacidad
+        
         /* ================================== */
         /* FUNCIONES DE ESTADO Y TEMA */
         /* ================================== */
@@ -220,7 +234,8 @@
         async function loadContent() {
             updateStatus('Conectando con la nube...', 'saving', 'cloud_queue');
             try {
-                const response = await fetch('/api/libro');
+                // Enviamos el UserID como parámetro de consulta
+                const response = await fetch(`/api/libro?userId=${CURRENT_USER_ID}`);
                 const data = await response.json();
                 editor.value = data.contenido;
                 updateStatus('¡Libro cargado exitosamente!', 'success', 'check_circle');
@@ -234,10 +249,14 @@
             updateStatus('Guardando automáticamente...', 'saving', 'save');
             
             try {
+                // Enviamos el UserID en el cuerpo de la petición (POST)
                 const response = await fetch('/api/libro', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contenido: editor.value })
+                    body: JSON.stringify({ 
+                        contenido: editor.value,
+                        userId: CURRENT_USER_ID // <--- ENVIAMOS EL ID AL SERVIDOR
+                    })
                 });
 
                 if (response.ok) {
